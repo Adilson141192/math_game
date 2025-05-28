@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jogo da Tabuada</title>
-
-    <!-- ajuste o caminho se sua pasta de estilos ficar em outra pasta -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
 
@@ -15,11 +13,11 @@
     <!-- MENU PRINCIPAL -->
     <div id="menu">
         <button onclick="showConfig()">Iniciar Jogo</button>
-        <button onclick="startTraining()">Treino Livre</button>     <!-- NOVO -->
+        <button onclick="startTraining()">Treinar Livremente</button>
         <button onclick="showRanking()">Ver Ranking</button>
     </div>
 
-    <!-- CONFIGURAÇÕES DO JOGO NORMAL -->
+    <!-- CONFIGURAÇÕES -->
     <div id="config" class="hidden">
         <h2>Configurar Jogo</h2>
 
@@ -43,22 +41,23 @@
             <label><input type="checkbox" value="÷" checked /> Divisão</label>
         </fieldset>
 
+        <!-- NOVO: checkbox de ajuda -->
+        <label style="margin-top:1rem;display:block;">
+            <input type="checkbox" id="helpCheckbox" checked />
+            Mostrar explicação quando errar
+        </label>
+
         <button onclick="startGame()">Começar!</button>
         <button onclick="backToMenu()">Cancelar</button>
     </div>
 
-    <!-- ÁREA DE JOGO (COMPARTILHADA PELO MODO TREINO) -->
+    <!-- ÁREA DE JOGO -->
     <div id="game" class="hidden">
         <div id="question"></div>
 
         <form id="answerForm">
-            <input
-                id="answerInput"
-                type="number"
-                inputmode="numeric"
-                placeholder="Sua resposta"
-                required
-            />
+            <input id="answerInput" type="number" inputmode="numeric"
+                   placeholder="Sua resposta" required />
             <button type="submit">Responder</button>
         </form>
 
@@ -72,6 +71,7 @@
 
         <div id="feedback"></div>
 
+        <!-- visível só no treino -->
         <button id="quitTrainingBtn" class="hidden" onclick="backToMenu()">
             Voltar ao Menu
         </button>
@@ -96,12 +96,13 @@
         <button onclick="backToMenu()">Voltar</button>
     </div>
 
-    <!-- sons -->
     <audio id="yaySound" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="booSound" src="assets/wrong.mp3" preload="auto"></audio>
 
-    <!-- ajuste o caminho se seu JS ficar em outra pasta -->
     <script src="js/script.js"></script>
+    <script src="js/gameEngine.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 <footer>

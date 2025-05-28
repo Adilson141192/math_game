@@ -1,12 +1,11 @@
 :root {
   --primary: #2563eb;
-  --accent: #06b6d4;
-  --bg: #f0f9ff;
-  --text: #0f172a;
+  --accent:  #06b6d4;
+  --bg:      #f0f9ff;
+  --text:    #0f172a;
 }
-* {
-  box-sizing: border-box;
-}
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -20,15 +19,9 @@ body {
   min-height: 100vh;
 }
 
-h1 {
-  margin-top: 100px;
-  text-align: center;
-  font-size: 1.75rem;
-}
+h1 { margin-top: 100px; text-align: center; font-size: 1.75rem; }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 #menu, #config, #game, #ranking {
   width: 100%;
@@ -52,16 +45,9 @@ button {
   width: 100%;
   margin-top: 0.5rem;
 }
+button:active { transform: scale(0.97); }
 
-button:active {
-  transform: scale(0.97);
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+form { display: flex; flex-direction: column; gap: 0.75rem; }
 
 input[type="number"], input[type="text"], select {
   font-size: 1rem;
@@ -71,115 +57,52 @@ input[type="number"], input[type="text"], select {
   width: 100%;
 }
 
-#question {
-  font-size: 2rem;
-  text-align: center;
-  margin-bottom: 1rem;
-}
+#question { font-size: 2rem; text-align: center; margin-bottom: 1rem; }
 
 #stats {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  align-items: center;
+  display: flex; justify-content: space-between;
+  margin-top: 1rem; font-size: 0.9rem; align-items: center;
 }
 
 #feedback {
-  height: 3.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
+  height: 3.5rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font-size: 3rem;
 }
 
-#ranking table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-#ranking th, #ranking td {
-  border: 1px solid #e2e8f0;
-  padding: 0.5rem;
-  text-align: center;
-}
-
-#ranking th {
-  background: var(--accent);
-  color: white;
-}
+/* RANKING */
+#ranking table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+#ranking th, #ranking td { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: center; }
+#ranking th { background: var(--accent); color: white; }
 
 .help {
-  font-size: 1rem;
-  text-align: center;
-  color: var(--text);
-  margin-top: 0.5rem;
-  background: #f8fafc;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  border-left: 4px solid var(--primary);
-  width: 100%;
+  font-size: 1rem; text-align: center; color: var(--text);
+  margin-top: 0.5rem; background: #f8fafc;
+  padding: 0.5rem; border-radius: 0.5rem; border-left: 4px solid var(--primary);
 }
-
 .help strong {
-  color: var(--primary);
-  font-weight: bold;
-  background: #e0f2fe;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
+  color: var(--primary); font-weight: bold;
+  background: #e0f2fe; padding: 0.2rem 0.4rem; border-radius: 0.25rem;
 }
 
-.average-row {
-  background-color: #f8fafc;
-  font-weight: bold;
-}
+.average-row { background-color: #f8fafc; font-weight: bold; }
 
 #extraQuestions {
-  background: var(--accent);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  display: inline-block;
+  background: var(--accent); color: white; padding: 0.25rem 0.5rem;
+  border-radius: 1rem; font-size: 0.8rem; display: inline-block;
 }
+#extraQuestions.hidden { display: none; }
 
-#extraQuestions.hidden {
-  display: none;
-}
+@keyframes pop   { 0%{transform:scale(.25);opacity:0;} 70%{transform:scale(1.3);opacity:1;} 100%{transform:scale(1);} }
+@keyframes shake { 10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);} 30%,50%,70%{transform:translateX(-4px);} 40%,60%{transform:translateX(4px);} }
 
+.happy { animation: pop 0.45s ease-out forwards; color:#16a34a; }
+.sad   { animation: shake 0.6s ease-in-out forwards; color:#dc2626; }
+
+/* NOVO: botão de saída do treino */
 #quitTrainingBtn {
   margin-top: 1.5rem;
   background: transparent;
   color: var(--primary);
   border: 2px solid var(--primary);
 }
-
-#quitTrainingBtn.hidden {
-  display: none;
-}
-
-@keyframes pop {
-  0% { transform: scale(0.25); opacity: 0; }
-  70% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-@keyframes shake {
-  10%, 90% { transform: translateX(-2px); }
-  20%, 80% { transform: translateX(4px); }
-  30%, 50%, 70% { transform: translateX(-4px); }
-  40%, 60% { transform: translateX(4px); }
-}
-
-.happy {
-  animation: pop 0.45s ease-out forwards;
-  color: #16a34a;
-}
-
-.sad {
-  animation: shake 0.6s ease-in-out forwards;
-  color: #dc2626;
-}
-
+#quitTrainingBtn.hidden { display: none; }

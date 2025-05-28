@@ -1,26 +1,26 @@
-/* ---------- elementos de DOM ---------- */
-const questionEl   = document.getElementById('question');
-const form         = document.getElementById('answerForm');
-const answerInput  = document.getElementById('answerInput');
-const progressEl   = document.getElementById('progress');
-const extraCountEl = document.getElementById('extraCount');
-const extraQuestionsEl = document.getElementById('extraQuestions');
-const timerEl      = document.getElementById('timer');
-const feedbackEl   = document.getElementById('feedback');
-const yaySound     = document.getElementById('yaySound');
-const booSound     = document.getElementById('booSound');
+/* ---------- elementos DOM ---------- */
+const questionEl  = document.getElementById('question');
+const form        = document.getElementById('answerForm');
+const answerInput = document.getElementById('answerInput');
+const progressEl  = document.getElementById('progress');
+const extraCountEl      = document.getElementById('extraCount');
+const extraQuestionsEl  = document.getElementById('extraQuestions');
+const timerEl     = document.getElementById('timer');
+const feedbackEl  = document.getElementById('feedback');
+const yaySound    = document.getElementById('yaySound');
+const booSound    = document.getElementById('booSound');
 
-const menu     = document.getElementById('menu');
-const config   = document.getElementById('config');
-const game     = document.getElementById('game');
-const ranking  = document.getElementById('ranking');
-const quitTrainingBtn = document.getElementById('quitTrainingBtn');   // NOVO
+const menu   = document.getElementById('menu');
+const config = document.getElementById('config');
+const game   = document.getElementById('game');
+const ranking= document.getElementById('ranking');
+const quitTrainingBtn = document.getElementById('quitTrainingBtn');
 
 const rankingBody = document.getElementById('rankingBody');
 
-/* ---------- configuração geral ---------- */
-const QUESTIONS_PER_GAME     = 20;
-const MAX_TIME_PER_QUESTION  = 30000;
+/* ---------- constantes ---------- */
+const QUESTIONS_PER_GAME    = 20;
+const MAX_TIME_PER_QUESTION = 30000;
 
 /* ---------- estado ---------- */
 let currentAnswer = 0;
@@ -37,11 +37,12 @@ let playerName    = '';
 let score         = 0;
 let extraQuestionCount = 0;
 
-let isTraining    = false;   // NOVO
+let isTraining = false;
+let showHelp   = true;   // NOVO
 
 /* ---------- navegação ---------- */
 function showConfig() {
-    isTraining = false;      // ↩ garante que estamos no modo normal
+    isTraining = false;
     menu.classList.add('hidden');
     config.classList.remove('hidden');
 }
@@ -53,30 +54,32 @@ function showRanking() {
 }
 
 function backToMenu() {
-    // volta ao início a partir de qualquer tela
+
     [config, game, ranking].forEach(el => el.classList.add('hidden'));
     menu.classList.remove('hidden');
     resetGame();
 }
 
-/* ---------- modo TREINO ---------- */
-function startTraining() {                         // NOVO
+/* ---------- Modo Treino ---------- */
+function startTraining() {
     isTraining = true;
     playerName = 'Treino';
-    difficulty = 'easy';                          // você pode mudar isso depois ou exibir pequenas opções
+    difficulty = 'easy';
     selectedOps = ['+', '-', '×', '÷'];
+    showHelp = true;                // sempre mostra explicação
 
-    quitTrainingBtn.classList.remove('hidden');   // mostra botão sair
+    quitTrainingBtn.classList.remove('hidden');
     menu.classList.add('hidden');
     game.classList.remove('hidden');
 
     resetGame();
-    generateQuestion();
+    generateQuestion();             // garante primeira pergunta
 }
 
-/* ---------- modo JOGO NORMAL ---------- */
+/* ---------- Jogo Normal ---------- */
 function startGame() {
-    isTraining = false;                           // ↩
+    isTraining = false;
+
     const nameInput = document.getElementById('playerName');
     playerName = nameInput.value.trim();
     if (!playerName) {
@@ -91,44 +94,41 @@ function startGame() {
                   ).map(cb => cb.value);
     if (selectedOps.length === 0) selectedOps = ['+', '-', '×', '÷'];
 
+    showHelp = document.getElementById('helpCheckbox').checked;   // NOVO
+
     config.classList.add('hidden');
     game.classList.remove('hidden');
-    quitTrainingBtn.classList.add('hidden');      // ↩ esconde o botão caso venha do treino
+    quitTrainingBtn.classList.add('hidden');
 
     resetGame();
-    generateQuestion();
+    generateQuestion();             // gera a primeira pergunta
 }
 
-/* ---------- utilidades ---------- */
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+/* ---------- util ---------- */
+const randomInt = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
 
-/* ---------- geração de questões ---------- */
+/* ---------- geração de questão ---------- */
 function generateQuestion() {
     if (questionTimeout) clearTimeout(questionTimeout);
 
-    /* VISIBILIDADE de progresso */
-    if (isTraining) {
-        progressEl.style.visibility = 'hidden';
-    } else {
-        progressEl.style.visibility = 'visible';
-    }
+    // visibilidade do progresso
+    progressEl.style.visibility = isTraining ? 'hidden' : 'visible';
 
-    /* UI de perguntas extras */
+    // UI de extras
     if (extraQuestionCount > 0) {
         extraCountEl.textContent = extraQuestionCount;
         extraQuestionsEl.classList.remove('hidden');
         progressEl.textContent = `Questão Extra (${extraQuestionCount})`;
     } else {
         extraQuestionsEl.classList.add('hidden');
-        if (!isTraining) questionIndex++;         // ↩ não conta no modo treino
-        progressEl.textContent = 
-          isTraining ? '' : `Questão ${questionIndex} / ${QUESTIONS_PER_GAME}`;
+        if (!isTraining) questionIndex++;
+        if (!isTraining)
+            progressEl.textContent = `Questão ${questionIndex} / ${QUESTIONS_PER_GAME}`;
     }
 
-    /* sorteia operação e valores */
-    const op  = selectedOps[randomInt(0, selectedOps.length - 1)];
+    // sorteia operação e números
+    const op = selectedOps[randomInt(0, selectedOps.length - 1)];
     let a, b, max;
     switch (difficulty) {
         case 'veryeasy': max = 5; break;
@@ -139,10 +139,10 @@ function generateQuestion() {
     }
 
     switch (op) {
-        case '+': a = randomInt(1, max); b = randomInt(1, max); currentAnswer = a + b; break;
-        case '-': a = randomInt(1, max); b = randomInt(1, a);   currentAnswer = a - b; break;
-        case '×': a = randomInt(1, max / 2); b = randomInt(1, max / 2); currentAnswer = a * b; break;
-        case '÷': b = randomInt(1, max / 2); currentAnswer = randomInt(1, max / 2); a = currentAnswer * b; break;
+        case '+': a = randomInt(1, max);          b = randomInt(1, max);          currentAnswer = a + b; break;
+        case '-': a = randomInt(1, max);          b = randomInt(1, a);            currentAnswer = a - b; break;
+        case '×': a = randomInt(1, max / 2);      b = randomInt(1, max / 2);      currentAnswer = a * b; break;
+        case '÷': b = randomInt(1, max / 2);      currentAnswer = randomInt(1, max / 2); a = currentAnswer * b; break;
     }
 
     questionEl.textContent = `${a} ${op} ${b} = ?`;
@@ -169,13 +169,13 @@ function stopTimer() {
     timerEl.textContent = `${delta.toFixed(1)} s`;
 }
 
-/* ---------- feedback visual ---------- */
+/* ---------- feedback ---------- */
 function showFeedback(isCorrect) {
     feedbackEl.innerHTML = isCorrect ? '<div>🎉</div>' : '<div>😢</div>';
-    feedbackEl.className = isCorrect ? 'happy' : 'sad';
+    feedbackEl.className  = isCorrect ? 'happy' : 'sad';
     (isCorrect ? yaySound : booSound).play();
 
-    if (!isCorrect) {
+    if (!isCorrect && showHelp) {
         const helpDiv = document.createElement('div');
         helpDiv.className = 'help';
         helpDiv.innerHTML = `Resposta correta: <strong>${currentAnswer}</strong>`;
@@ -188,7 +188,7 @@ function showFeedback(isCorrect) {
     }, isCorrect ? 800 : 2000);
 }
 
-/* ---------- submissão de resposta ---------- */
+/* ---------- submissão ---------- */
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const userValue = Number(answerInput.value);
@@ -199,7 +199,7 @@ form.addEventListener('submit', (e) => {
     showFeedback(correct);
 
     if (correct) {
-        if (!isTraining) score += getScoreByDifficulty(difficulty);     // ↩ sem pontuação no treino
+        if (!isTraining) score += getScoreByDifficulty(difficulty);
 
         if (extraQuestionCount > 0) {
             extraQuestionCount--;
@@ -219,7 +219,7 @@ form.addEventListener('submit', (e) => {
     }
 });
 
-/* ---------- timeout de questão ---------- */
+/* ---------- timeout ---------- */
 function handleTimeout() {
     stopTimer();
     showFeedback(false);
@@ -231,13 +231,18 @@ function handleTimeout() {
     setTimeout(generateQuestion, 2000);
 }
 
-/* ---------- reiniciar ---------- */
+/* ---------- reinício ---------- */
 function resetGame() {
     questionIndex = 0;
     totalTime = 0;
     errorCount = 0;
     score = 0;
     extraQuestionCount = 0;
+    currentAnswer = 0;
+
+    clearInterval(timerInterval);
+    clearTimeout(questionTimeout);
+
     questionEl.textContent = '';
     progressEl.textContent = '';
     timerEl.textContent = '';
@@ -245,10 +250,10 @@ function resetGame() {
 
 /* ---------- final ---------- */
 function finishGame() {
-    if (!isTraining) saveScore();   // ↩ não salva ranking no modo treino
+    if (!isTraining) saveScore();
 
     alert(`${isTraining ? 'Fim do treino!' : 'Parabéns, ' + playerName + '!'}
-Tempo total: ${totalTime.toFixed(1)} segundos.
+Tempo total: ${totalTime.toFixed(1)} s
 Erros: ${errorCount}
 ${isTraining ? '' : 'Pontuação: ' + score}`);
 
@@ -267,9 +272,9 @@ function getScoreByDifficulty(lvl) {
     }
 }
 
-/* ---------- ranking (sem mudanças exceto no saveScore) ---------- */
+/* ---------- ranking ---------- */
 function saveScore() {
-    // se cair aqui, já sabemos que não é treino
+
     const data = {
         name: playerName,
         difficulty,
@@ -280,31 +285,28 @@ function saveScore() {
     };
 
     let rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
-    const existingPlayerIndex = rankings.findIndex(r => r.name === playerName);
+    const idx = rankings.findIndex(r => r.name === playerName);
 
-    if (existingPlayerIndex !== -1) {
-        rankings[existingPlayerIndex].gamesPlayed += 1;
-        if (score > rankings[existingPlayerIndex].score) {
-            rankings[existingPlayerIndex] = { 
-                ...data, 
-                gamesPlayed: rankings[existingPlayerIndex].gamesPlayed 
-            };
+    if (idx !== -1) {
+        rankings[idx].gamesPlayed += 1;
+        if (score > rankings[idx].score) {
+            rankings[idx] = { ...data, gamesPlayed: rankings[idx].gamesPlayed };
         }
     } else {
         rankings.push(data);
     }
 
-    rankings.sort((a, b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
-    rankings = rankings.slice(0, 10);
+    rankings.sort((a,b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
+    rankings = rankings.slice(0,10);
     localStorage.setItem('rankings', JSON.stringify(rankings));
 }
 
 function renderRanking() {
     const rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
-    rankings.sort((a, b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
+    rankings.sort((a,b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
 
-    const averageScore = rankings.length
-        ? rankings.reduce((sum, r) => sum + r.score, 0) / rankings.length
+    const avg = rankings.length
+        ? rankings.reduce((s,r) => s + r.score, 0) / rankings.length
         : 0;
 
     rankingBody.innerHTML = rankings.map(r => `
@@ -315,16 +317,15 @@ function renderRanking() {
             <td>${r.errors}</td>
             <td>${r.score}</td>
             <td>${r.gamesPlayed || 1}</td>
-        </tr>
-    `).join('') || '<tr><td colspan="6">Sem registros ainda.</td></tr>';
+        </tr>`).join('') || '<tr><td colspan="6">Sem registros ainda.</td></tr>';
 
     if (rankings.length) {
         rankingBody.innerHTML += `
-            <tr class="average-row">
-                <td colspan="4">Média dos Top 10</td>
-                <td>${averageScore.toFixed(1)}</td>
-                <td></td>
-            </tr>`;
+        <tr class="average-row">
+            <td colspan="4">Média dos Top 10</td>
+            <td>${avg.toFixed(1)}</td>
+            <td></td>
+        </tr>`;
     }
 }
 
@@ -338,3 +339,4 @@ function translateLevel(lvl) {
         default:         return lvl;
     }
 }
+
