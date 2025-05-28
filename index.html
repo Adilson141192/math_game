@@ -1,23 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jogo da Tabuada</title>
-    <link rel="stylesheet" href="css/style.css">
+
+    <!-- ajuste o caminho se sua pasta de estilos ficar em outra pasta -->
+    <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
     <h1>Jogo da Tabuada</h1>
 
+    <!-- MENU PRINCIPAL -->
     <div id="menu">
         <button onclick="showConfig()">Iniciar Jogo</button>
+        <button onclick="startTraining()">Treino Livre</button>     <!-- NOVO -->
         <button onclick="showRanking()">Ver Ranking</button>
     </div>
 
+    <!-- CONFIGURAÇÕES DO JOGO NORMAL -->
     <div id="config" class="hidden">
         <h2>Configurar Jogo</h2>
+
         <label for="playerName">Seu nome:</label>
-        <input id="playerName" type="text" placeholder="Digite seu nome" required>
+        <input id="playerName" type="text" placeholder="Digite seu nome" required />
 
         <label for="level">Nível:</label>
         <select id="level">
@@ -30,32 +37,47 @@
 
         <fieldset>
             <legend>Operações:</legend>
-            <label><input type="checkbox" value="+" checked> Soma</label>
-            <label><input type="checkbox" value="-" checked> Subtração</label>
-            <label><input type="checkbox" value="×" checked> Multiplicação</label>
-            <label><input type="checkbox" value="÷" checked> Divisão</label>
+            <label><input type="checkbox" value="+" checked /> Soma</label>
+            <label><input type="checkbox" value="-" checked /> Subtração</label>
+            <label><input type="checkbox" value="×" checked /> Multiplicação</label>
+            <label><input type="checkbox" value="÷" checked /> Divisão</label>
         </fieldset>
 
         <button onclick="startGame()">Começar!</button>
         <button onclick="backToMenu()">Cancelar</button>
     </div>
 
+    <!-- ÁREA DE JOGO (COMPARTILHADA PELO MODO TREINO) -->
     <div id="game" class="hidden">
         <div id="question"></div>
+
         <form id="answerForm">
-            <input id="answerInput" type="number" inputmode="numeric" placeholder="Sua resposta" required />
+            <input
+                id="answerInput"
+                type="number"
+                inputmode="numeric"
+                placeholder="Sua resposta"
+                required
+            />
             <button type="submit">Responder</button>
         </form>
 
         <div id="stats">
             <span id="progress"></span>
-            <span id="extraQuestions" class="hidden">+<span id="extraCount">0</span> extra</span>
+            <span id="extraQuestions" class="hidden">
+                +<span id="extraCount">0</span> extra
+            </span>
             <span id="timer"></span>
         </div>
 
         <div id="feedback"></div>
+
+        <button id="quitTrainingBtn" class="hidden" onclick="backToMenu()">
+            Voltar ao Menu
+        </button>
     </div>
 
+    <!-- RANKING -->
     <div id="ranking" class="hidden">
         <h2>Ranking - Top 10</h2>
         <table>
@@ -74,9 +96,15 @@
         <button onclick="backToMenu()">Voltar</button>
     </div>
 
+    <!-- sons -->
     <audio id="yaySound" src="assets/correct.mp3" preload="auto"></audio>
     <audio id="booSound" src="assets/wrong.mp3" preload="auto"></audio>
 
+    <!-- ajuste o caminho se seu JS ficar em outra pasta -->
     <script src="js/script.js"></script>
 </body>
+
+<footer>
+    <h3>Desenvolvido por Adilson L. S. Junior</h3>
+</footer>
 </html>
