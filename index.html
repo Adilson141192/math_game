@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Tabuada</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
     <h1>Jogo da Tabuada</h1>
 
@@ -18,7 +16,6 @@
 
     <div id="config" class="hidden">
         <h2>Configurar Jogo</h2>
-
         <label for="playerName">Seu nome:</label>
         <input id="playerName" type="text" placeholder="Digite seu nome" required>
 
@@ -45,7 +42,6 @@
 
     <div id="game" class="hidden">
         <div id="question"></div>
-
         <form id="answerForm">
             <input id="answerInput" type="number" inputmode="numeric" placeholder="Sua resposta" required />
             <button type="submit">Responder</button>
@@ -53,6 +49,7 @@
 
         <div id="stats">
             <span id="progress"></span>
+            <span id="extraQuestions" class="hidden">+<span id="extraCount">0</span> extra</span>
             <span id="timer"></span>
         </div>
 
@@ -60,7 +57,7 @@
     </div>
 
     <div id="ranking" class="hidden">
-        <h2>Ranking</h2>
+        <h2>Ranking - Top 10</h2>
         <table>
             <thead>
                 <tr>
@@ -69,11 +66,11 @@
                     <th>Tempo (s)</th>
                     <th>Erros</th>
                     <th>Pontuação</th>
+                    <th>Partidas</th>
                 </tr>
             </thead>
             <tbody id="rankingBody"></tbody>
         </table>
-        <button onclick="clearRanking()">Limpar Ranking</button>
         <button onclick="backToMenu()">Voltar</button>
     </div>
 
@@ -82,5 +79,4 @@
 
     <script src="js/script.js"></script>
 </body>
-
 </html>

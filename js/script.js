@@ -2,6 +2,8 @@ const questionEl = document.getElementById('question');
 const form = document.getElementById('answerForm');
 const answerInput = document.getElementById('answerInput');
 const progressEl = document.getElementById('progress');
+const extraCountEl = document.getElementById('extraCount');
+const extraQuestionsEl = document.getElementById('extraQuestions');
 const timerEl = document.getElementById('timer');
 const feedbackEl = document.getElementById('feedback');
 const yaySound = document.getElementById('yaySound');
@@ -14,17 +16,25 @@ const ranking = document.getElementById('ranking');
 
 const rankingBody = document.getElementById('rankingBody');
 
+// Configurações
+const QUESTIONS_PER_GAME = 20;
+const MAX_TIME_PER_QUESTION = 30000;
+
+// Estado do jogo
 let currentAnswer = 0;
 let questionIndex = 0;
 let totalTime = 0;
 let errorCount = 0;
 let startTime = null;
 let timerInterval = null;
+let questionTimeout = null;
 let selectedOps = ['+', '-', '×', '÷'];
 let difficulty = 'easy';
 let playerName = '';
 let score = 0;
+let extraQuestionCount = 0;
 
+// Navegação
 function showConfig() {
     menu.classList.add('hidden');
     config.classList.remove('hidden');
@@ -41,8 +51,10 @@ function backToMenu() {
     game.classList.add('hidden');
     ranking.classList.add('hidden');
     menu.classList.remove('hidden');
+    resetGame();
 }
 
+// Jogo
 function startGame() {
     const nameInput = document.getElementById('playerName');
     playerName = nameInput.value.trim();
@@ -65,8 +77,22 @@ function randomInt(min, max) {
 }
 
 function generateQuestion() {
+    if (questionTimeout) clearTimeout(questionTimeout);
+    
+    // Atualiza UI de perguntas extras
+    if (extraQuestionCount > 0) {
+        extraCountEl.textContent = extraQuestionCount;
+        extraQuestionsEl.classList.remove('hidden');
+        progressEl.textContent = `Questão Extra (${extraQuestionCount})`;
+    } else {
+        extraQuestionsEl.classList.add('hidden');
+        questionIndex++;
+        progressEl.textContent = `Questão ${questionIndex} / ${QUESTIONS_PER_GAME}`;
+    }
+
     const op = selectedOps[randomInt(0, selectedOps.length - 1)];
     let a, b, max;
+    
     switch (difficulty) {
         case 'veryeasy': max = 5; break;
         case 'easy': max = 10; break;
@@ -101,16 +127,32 @@ function generateQuestion() {
     questionEl.textContent = `${a} ${op} ${b} = ?`;
     answerInput.value = '';
     answerInput.focus();
-    questionIndex++;
-    progressEl.textContent = `Questão ${questionIndex} / 10`;
     startTimer();
+    
+    questionTimeout = setTimeout(() => {
+        handleTimeout();
+    }, MAX_TIME_PER_QUESTION);
+}
+
+function handleTimeout() {
+    stopTimer();
+    showFeedback(false);
+    errorCount++;
+    answerInput.value = '';
+    
+    // Adiciona pergunta extra se for uma pergunta normal
+    if (extraQuestionCount === 0 && questionIndex <= QUESTIONS_PER_GAME) {
+        extraQuestionCount++;
+    }
+    
+    setTimeout(generateQuestion, 2000);
 }
 
 function startTimer() {
     startTime = performance.now();
     timerInterval = setInterval(() => {
         const elapsed = (performance.now() - startTime) / 1000;
-        timerEl.textContent = `${elapsed.toFixed(1)} s`;
+        timerEl.textContent = `${elapsed.toFixed(1)} s`;
     }, 100);
 }
 
@@ -118,49 +160,66 @@ function stopTimer() {
     clearInterval(timerInterval);
     const delta = (performance.now() - startTime) / 1000;
     totalTime += delta;
-    timerEl.textContent = `${delta.toFixed(1)} s`;
+    timerEl.textContent = `${delta.toFixed(1)} s`;
 }
 
 function showFeedback(isCorrect) {
-    feedbackEl.textContent = isCorrect ? '🎉' : '😢';
+    feedbackEl.innerHTML = isCorrect ? '<div>🎉</div>' : '<div>😢</div>';
     feedbackEl.className = isCorrect ? 'happy' : 'sad';
     (isCorrect ? yaySound : booSound).play();
+    
+    if (!isCorrect) {
+        const helpDiv = document.createElement('div');
+        helpDiv.className = 'help';
+        helpDiv.innerHTML = `Resposta correta: <strong>${currentAnswer}</strong>`;
+        feedbackEl.appendChild(helpDiv);
+    }
+    
     setTimeout(() => {
         feedbackEl.className = '';
-        feedbackEl.textContent = '';
-    }, 800);
+        feedbackEl.innerHTML = '';
+    }, isCorrect ? 800 : 2000);
 }
 
+// Event listeners
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const userValue = Number(answerInput.value);
     const correct = userValue === currentAnswer;
     stopTimer();
+    clearTimeout(questionTimeout);
+    
     showFeedback(correct);
 
     if (correct) {
         score += getScoreByDifficulty(difficulty);
-        if (questionIndex === 10) {
+        
+        if (extraQuestionCount > 0) {
+            extraQuestionCount--;
+            setTimeout(generateQuestion, 800);
+        } else if (questionIndex >= QUESTIONS_PER_GAME) {
             setTimeout(finishGame, 500);
         } else {
-            setTimeout(generateQuestion, 600);
+            setTimeout(generateQuestion, 800);
         }
     } else {
         errorCount++;
+        // Adiciona pergunta extra quando erra (apenas para perguntas normais)
+        if (extraQuestionCount === 0 && questionIndex <= QUESTIONS_PER_GAME) {
+            extraQuestionCount = 1;
+        }
         answerInput.value = '';
-        setTimeout(() => {
-            answerInput.focus();
-            startTimer();
-        }, 600);
+        setTimeout(() => answerInput.focus(), 800);
     }
 });
 
+// Finalização do jogo
 function resetGame() {
     questionIndex = 0;
     totalTime = 0;
     errorCount = 0;
     score = 0;
-    generateQuestion();
+    extraQuestionCount = 0;
 }
 
 function finishGame() {
@@ -183,31 +242,66 @@ function getScoreByDifficulty(lvl) {
     }
 }
 
+// Ranking
 function saveScore() {
     const data = {
         name: playerName,
         difficulty,
         time: parseFloat(totalTime.toFixed(1)),
         errors: errorCount,
-        score
+        score,
+        gamesPlayed: 1
     };
-    const rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
-    rankings.push(data);
+    
+    let rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
+    const existingPlayerIndex = rankings.findIndex(r => r.name === playerName);
+    
+    if (existingPlayerIndex !== -1) {
+        // Sempre incrementa o contador, mesmo que não seja o melhor score
+        rankings[existingPlayerIndex].gamesPlayed += 1;
+        
+        // Atualiza apenas se for um score melhor
+        if (score > rankings[existingPlayerIndex].score) {
+            rankings[existingPlayerIndex] = { 
+                ...data, 
+                gamesPlayed: rankings[existingPlayerIndex].gamesPlayed 
+            };
+        }
+    } else {
+        rankings.push(data);
+    }
+    
+    rankings.sort((a, b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
+    rankings = rankings.slice(0, 10);
     localStorage.setItem('rankings', JSON.stringify(rankings));
 }
 
 function renderRanking() {
     const rankings = JSON.parse(localStorage.getItem('rankings') || '[]');
     rankings.sort((a, b) => b.score - a.score || a.time - b.time || a.errors - b.errors);
+    
+    const averageScore = rankings.length > 0 
+        ? rankings.reduce((sum, r) => sum + r.score, 0) / rankings.length 
+        : 0;
+    
     rankingBody.innerHTML = rankings.map(r =>
-        `<tr><td>${r.name}</td><td>${translateLevel(r.difficulty)}</td><td>${r.time}</td><td>${r.errors}</td><td>${r.score}</td></tr>`
-    ).join('') || '<tr><td colspan="5">Sem registros ainda.</td></tr>';
-}
-
-function clearRanking() {
-    if (confirm('Tem certeza que deseja limpar o ranking?')) {
-        localStorage.removeItem('rankings');
-        renderRanking();
+        `<tr>
+            <td>${r.name}</td>
+            <td>${translateLevel(r.difficulty)}</td>
+            <td>${r.time}</td>
+            <td>${r.errors}</td>
+            <td>${r.score}</td>
+            <td>${r.gamesPlayed || 1}</td>
+        </tr>`
+    ).join('') || '<tr><td colspan="6">Sem registros ainda.</td></tr>';
+    
+    if (rankings.length > 0) {
+        rankingBody.innerHTML += `
+        <tr class="average-row">
+            <td colspan="4">Média dos Top 10</td>
+            <td>${averageScore.toFixed(1)}</td>
+            <td></td>
+        </tr>`;
     }
 }
 
